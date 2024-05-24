@@ -123,6 +123,20 @@ auto compute_start_lined_hash(const Picture& pic, size_t K) {
     return lined_hash;
 }
 
+auto compute_lined_text(const Picture& pic, size_t K) {
+    std::vector<std::string> lined_text;
+
+    std::string text;
+    for(size_t i = 0; i < K; ++i) {
+        for(size_t j = pic.get_collumns() - K; j < pic.get_collumns(); ++j) {
+            text += pic[i][j];
+        }
+        lined_text.push_back(std::move(text));
+    }
+
+    return lined_text;
+}
+
 
 auto compute_multiplier(size_t length) {
     long long multiplier = 1;
@@ -135,8 +149,26 @@ auto compute_multiplier(size_t length) {
     return multiplier;
 }
 
-bool check_text(const std::string& text, const std::string& pattern) {
-    return text == pattern;
+bool check_text(const Picture& pic, std::vector<std::string> pattern, size_t text_i, size_t text_j, size_t k, size_t pattern_i) {
+    if(pattern.size() != k && pattern[0].size() != k) {
+        return false;
+    }
+
+
+    size_t pattern_j = 0;
+    while(k > 0) {
+        if(pic[text_i][text_j] != pattern[pattern_i][pattern_j]) {
+            return false;
+        }
+
+        ++text_j;
+        ++pattern_j;
+        --k;
+    }
+    
+    
+    
+    return true;
 }
 
 
@@ -151,34 +183,40 @@ std::vector<size_t> picture_search(const Picture& pic, size_t K) {
 
     auto pattern_lined_hash = compute_lined_hash(pic, K);
     auto picture_lined_hash = compute_start_lined_hash(pic, K);
+    
+    auto pattern_lined_text = compute_lined_text(pic, K);
+    
+    auto multiplier = compute_multiplier(K);
 
-
-    // for(auto x: picture_lined_hash) {
-    //     std::cout << x << ' ';
-    // }
-
-
+    long long current_hash;
+    
     for(size_t i = 0; i < pic.get_rows(); ++i) {
-     
-        for(size_t j = 0; j < pic.get_collumns(); ++j) {
+        current_hash = picture_lined_hash[i];
+
+        for(size_t j = K; j < pic.get_collumns(); ++j) {
             if(i < K && j >= pic.get_collumns()-K) {
                 continue;
             }
-
-            std::cout << i << ' ' << j << std::endl;   
-
-            // if(current_hash == searched_hash && check_text(text.substr(i-pattern.size(), pattern.size()), pattern)) {
-            // result.push_back(i-pattern.size());
             
-            // }
+            if(current_hash == pattern_lined_hash[0] && check_text(pic, pattern_lined_text, i, j-K, K, 0)) {
+                // check rest
+                std::cout << 1;
+            }
 
-            // rolling next
 
-
-
+            current_hash = (current_hash - (static_cast<int>(pic[i][j-K]) * multiplier)) & mask;
+            current_hash = (current_hash * prime + static_cast<int>(pic[i][j])) & mask;
         }
-        std::cout << '\n';
+
+        if(current_hash == pattern_lined_hash[0] && check_text(pic, pattern_lined_text, i, pic.get_collumns()-K, K, 0)) {
+            std::cout << 0;
+        }
+
     }
+
+    // if(current_hash == pattern_lined_hash[0]) {
+    //         std::cout << '\n' << "i last" << '\n';
+    // }
 }     
     // for(size_t i = 0; i < pic.get_rows(); ++i) {
     //     for(size_t j = 0; j < pic.get_collumns(); ++j) {
@@ -232,7 +270,6 @@ std::vector<size_t> picture_search(const Picture& pic, size_t K) {
 
     
 //     auto current_hash = compute_hash(text.substr(0, pattern.size()));
-//     auto multiplier = compute_multiplier(pattern.size());
 
 //     size_t i = pattern.size();
     
