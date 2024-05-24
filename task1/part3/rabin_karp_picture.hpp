@@ -90,7 +90,7 @@ auto compute_hash(const Picture& pic, size_t row, size_t indent_r = 0, size_t in
     return hash;
 }
 
-std::vector<long long> compute_lined_hash(const Picture& pic, size_t K) {
+auto compute_lined_hash(const Picture& pic, size_t K) {
     std::vector<long long> lined_hash;
 
     long long hash = 0;
@@ -105,6 +105,24 @@ std::vector<long long> compute_lined_hash(const Picture& pic, size_t K) {
 
     return lined_hash;
 }
+
+
+auto compute_start_lined_hash(const Picture& pic, size_t K) {
+    std::vector<long long> lined_hash;
+
+    long long hash = 0;
+    for(size_t i = 0; i < pic.get_rows(); ++i) {
+        for(size_t j = 0; j < K; ++j) {
+            hash = (hash * prime + static_cast<int>(pic[i][j])) & mask;
+        }
+
+        lined_hash.push_back(hash);
+        hash = 0;
+    }
+
+    return lined_hash;
+}
+
 
 // auto compute_hash(const std::string& text) {
 
@@ -143,14 +161,15 @@ std::vector<size_t> picture_search(const Picture& pic, size_t K) {
     }
 
 
-    auto lined_hash = compute_lined_hash(pic, K);
+    auto pattern_lined_hash = compute_lined_hash(pic, K);
+    auto picture_lined_hash = compute_start_lined_hash(pic, K);
 
-    for(size_t i = 0; i < lined_hash.size(); ++i) {
-        std::cout << lined_hash[i] << ' ';
+
+    for(auto x: picture_lined_hash) {
+        std::cout << x << ' ';
     }
-
 }    
-    auto current_hash = compute_hash();
+    //auto current_hash = compute_hash();
     
 
     // for(size_t i = 0; i < pic.get_rows(); ++i) {
