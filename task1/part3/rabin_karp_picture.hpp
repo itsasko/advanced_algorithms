@@ -5,7 +5,11 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <random>
 
+
+std::random_device rd;
+std::mt19937 gen(rd());
 
 constexpr int prime = 17;
 constexpr long long shift = 30;
@@ -37,6 +41,29 @@ public:
                 picture[i][j] = symbol;
             }
         }
+    }
+
+    void generate_picture(size_t K) {
+        std::uniform_int_distribution<size_t> dist(32, 120);
+
+        std::string pattern;
+        for(size_t i = 0; i < K*K; ++i) {
+            pattern += static_cast<char>(dist(gen));
+        }
+
+        for(size_t i = 0; i < rows; ++i) {
+            for(size_t j = 0; j < collumns; ++j) {
+                picture[i][j] = pattern[pattern.size() - 1 -(i+j)%pattern.size()];            
+            }
+        }
+
+
+        for(size_t i = 0; i < K; ++i) {
+            for(size_t j = collumns - K; j < collumns; ++j) {
+                picture[i][j] = pattern[pattern.size() -  1 - (i+j)%pattern.size()];
+            }
+        }        
+
     }
 
     void display_picture() const {
@@ -157,6 +184,7 @@ bool check_text(const Picture& pic, std::vector<std::string> pattern, size_t tex
 
     size_t pattern_j = 0;
     while(k > 0) {
+        
         if(pic[text_i][text_j] != pattern[pattern_i][pattern_j]) {
             return false;
         }
@@ -172,8 +200,8 @@ bool check_text(const Picture& pic, std::vector<std::string> pattern, size_t tex
 }
 
 
-std::vector<size_t> picture_search(const Picture& pic, size_t K) {
-    std::vector<size_t> result;
+auto picture_search(const Picture& pic, size_t K) {
+    std::vector<std::pair<size_t, size_t>> result;
 
 
     if(pic.size() < K*K) {
@@ -183,7 +211,6 @@ std::vector<size_t> picture_search(const Picture& pic, size_t K) {
 
     auto pattern_lined_hash = compute_lined_hash(pic, K);
     auto picture_lined_hash = compute_start_lined_hash(pic, K);
-    
     auto pattern_lined_text = compute_lined_text(pic, K);
     
     auto multiplier = compute_multiplier(K);
@@ -198,9 +225,23 @@ std::vector<size_t> picture_search(const Picture& pic, size_t K) {
                 continue;
             }
             
-            if(current_hash == pattern_lined_hash[0] && check_text(pic, pattern_lined_text, i, j-K, K, 0)) {
-                // check rest
-                std::cout << 1;
+            if(current_hash == pattern_lined_hash[0] && check_text(pic, pattern_lined_text, i, j-K, K, 0)) {                
+                size_t picture_level = i;
+                
+
+                if(picture_level+K > pic.get_rows()) {
+                    break;
+                }
+
+                for(size_t pattern_level = 1; pattern_level < K; ++pattern_level) {
+                    ++picture_level;
+                    
+                    if(!check_text(pic, pattern_lined_text, picture_level, j-K, K, pattern_level)) {
+                        break;
+                    }
+
+                    result.emplace_back(i, j-K);
+                }
             }
 
 
@@ -209,89 +250,27 @@ std::vector<size_t> picture_search(const Picture& pic, size_t K) {
         }
 
         if(current_hash == pattern_lined_hash[0] && check_text(pic, pattern_lined_text, i, pic.get_collumns()-K, K, 0)) {
-            std::cout << 0;
+            size_t picture_level = i;
+                
+            if(picture_level+K > pic.get_rows()) {
+                break;
+            }
+
+            for(size_t pattern_level = 1; pattern_level < K; ++pattern_level) {
+                ++picture_level;
+                
+                if(!check_text(pic, pattern_lined_text, picture_level, pic.get_collumns()-K, K, pattern_level)) {
+                    break;
+                }
+
+                result.emplace_back(i, pic.get_collumns()-K);
+            }
         }
 
     }
 
-    // if(current_hash == pattern_lined_hash[0]) {
-    //         std::cout << '\n' << "i last" << '\n';
-    // }
+    return result;
 }     
-    // for(size_t i = 0; i < pic.get_rows(); ++i) {
-    //     for(size_t j = 0; j < pic.get_collumns(); ++j) {
-            
-    //         if(i >= pic.get_rows()-K && j >= pic.get_collumns()-K) {
-    //             continue;
-    //         }
-                
-    //         if(current_hash == searched_hash && check_text(text.substr(i-pattern.size(), pattern.size()), pattern)) {
-    //         result.push_back(i-pattern.size());
-            
-    //         }
-
-    //         // rolling next
-
-
-
-    //     }
-    
-
-
-    // auto multiplier = compute_multiplier(pattern.size());
-    // size_t i = pattern.size();
-    
-    // for(; i < pic.size(); ++i) {
-    //     if(current_hash == searched_hash && check_text(text.substr(i-pattern.size(), pattern.size()), pattern)) {
-    //        result.push_back(i-pattern.size());
-    //     }
-
-
-    //     current_hash = (current_hash - (static_cast<int>(text[i-pattern.size()]) * multiplier)) & mask;
-    //     current_hash = (current_hash * prime + static_cast<int>(text[i])) & mask;
-
-    // }
-
-    // if(current_hash == searched_hash && check_text(text.substr(i-pattern.size(), pattern.size()), pattern)) {
-    //     result.push_back(i-pattern.size());
-    // }
-
-    // return result;
-
-
-// std::vector<size_t> picture_search(const std::string& text, const std::string& pattern) {
-//     std::vector<size_t> result;
-
-//     auto searched_hash = compute_hash(pattern);
-
-//     if(text.size() < pattern.size()) {
-//         return result;
-//     }
-
-    
-//     auto current_hash = compute_hash(text.substr(0, pattern.size()));
-
-//     size_t i = pattern.size();
-    
-//     for(; i < text.size(); ++i) {
-//         if(current_hash == searched_hash && check_text(text.substr(i-pattern.size(), pattern.size()), pattern)) {
-//            result.push_back(i-pattern.size());
-//         }
-
-
-//         current_hash = (current_hash - (static_cast<int>(text[i-pattern.size()]) * multiplier)) & mask;
-//         current_hash = (current_hash * prime + static_cast<int>(text[i])) & mask;
-
-//     }
-
-//     if(current_hash == searched_hash && check_text(text.substr(i-pattern.size(), pattern.size()), pattern)) {
-//         result.push_back(i-pattern.size());
-//     }
-
-//     return result;
-
-
-// }
 
 
 
