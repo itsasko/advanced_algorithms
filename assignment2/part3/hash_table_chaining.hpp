@@ -35,9 +35,8 @@ class hash_table {
 
 public:
 
-    hash_table(): capacity(0), elements(0) {}
     hash_table(size_t size): capacity(size), elements(0) {
-        values = NodePtrAllocTraits::allocate(NodePtrAlloc, capacity*sizeof(Node*));
+        values = NodePtrAllocTraits::allocate(NodePtrAlloc, capacity);
     }
 
     void insert(const T& value) {
@@ -49,14 +48,14 @@ public:
         
         Node* curr = values[index];
         if(!curr) {
-            values[index] = NodeAllocTraits::allocate(NodeAlloc, sizeof(Node));
+            values[index] = NodeAllocTraits::allocate(NodeAlloc, 1);
             NodeAllocTraits::construct(NodeAlloc, values[index], value);
         }
         else {
             while (curr->next != nullptr) {
                 curr = curr->next;
             }
-            curr->next = NodeAllocTraits::allocate(NodeAlloc, sizeof(Node));
+            curr->next = NodeAllocTraits::allocate(NodeAlloc, 1);
             NodeAllocTraits::construct(NodeAlloc, curr->next, value);
         }
 
@@ -81,21 +80,30 @@ public:
     }
 
 
-
-
-    //~hash_table() {
-       // for(size_t i = 0; i < capacity; ++i) {
-         //   if(values[i]) {
-                
-                //Node* curr = values[i];
-                //while(curr != nullptr) {
-                    // destroy
-                //}
-                // deallocate
-           // }
-           // NodeAllocator::deallocate()
-
-        //}
+    ~hash_table() {
+          
+       
+       for(size_t i = 0; i < capacity; ++i) {
+            Node* curr = values[i];
+           
+            NodeAllocTraits::destroy(NodeAlloc, values[i]);
+           
+            if(curr) {
+                Node* next = curr->next;
+           
+                while (next) {
+                    curr = next;
+                    next = curr->next;
+                    NodeAllocTraits::destroy(NodeAlloc, curr);
+                    NodeAllocTraits::deallocate(NodeAlloc, curr, sizeof(Node));
+                }
+            }
+           
+           NodeAllocTraits::deallocate(NodeAlloc, values[i], sizeof(Node));
+        }
+        NodePtrAllocTraits::deallocate(NodePtrAlloc, values, capacity*sizeof(Node*));
+  
+    }
         
 
     
