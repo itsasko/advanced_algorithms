@@ -12,6 +12,8 @@ class hash_table {
     struct Node {
         T value;
         Node* next = nullptr;
+
+        Node(const T& value): value(value) {}
     };
 
     Node** values = nullptr; 
@@ -29,6 +31,7 @@ class hash_table {
 
     NodeAllocator NodeAlloc;
     NodePtrAllocator NodePtrAlloc;
+    Hash hashable_obj;
 
 public:
 
@@ -37,15 +40,44 @@ public:
         values = NodePtrAllocTraits::allocate(NodePtrAlloc, capacity*sizeof(Node*));
     }
 
-    void insert() {
+    void insert(const T& value) {
         if(static_cast<double>(elements)/capacity > max_load_factor) {
             // rehash
+        }
+        
+        size_t index = hashable_obj(value)%capacity;
+        
+        Node* curr = values[index];
+        if(!curr) {
+            values[index] = NodeAllocTraits::allocate(NodeAlloc, sizeof(Node));
+            NodeAllocTraits::construct(NodeAlloc, values[index], value);
+        }
+        else {
+            while (curr->next != nullptr) {
+                curr = curr->next;
+            }
+            curr->next = NodeAllocTraits::allocate(NodeAlloc, sizeof(Node));
+            NodeAllocTraits::construct(NodeAlloc, curr->next, value);
         }
 
     }
 
     bool search(const T& value) {
-    
+        size_t index = hashable_obj(value)%capacity;
+
+        if(values[index] == nullptr) {
+            return false;
+        }
+
+        Node* curr = values[index];
+        while(curr) {
+            if(curr->value == value) {
+                return true;
+            }
+            curr = curr->next;
+        }
+
+        return false;
     }
 
 
