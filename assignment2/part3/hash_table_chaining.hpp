@@ -14,7 +14,7 @@ namespace hash_table_chaining {
             T value;
             Node* next = nullptr;
 
-            Node(const T& _value): value(_value) {}
+            Node(const T& _value): value(_value), next(nullptr) {}
         };
 
         Node** container = nullptr; 
@@ -38,6 +38,9 @@ namespace hash_table_chaining {
 
         explicit hash_table(size_t size): capacity(size), elements(0) {
             container = NodePtrAllocTraits::allocate(NodePtrAlloc, capacity);
+            for(size_t i = 0; i < capacity; ++i) {
+                NodePtrAllocTraits::construct(NodePtrAlloc, container+i, nullptr);
+            }
         }
 
         void insert(const T& value) {        
@@ -48,10 +51,11 @@ namespace hash_table_chaining {
                 container[index] = NodeAllocTraits::allocate(NodeAlloc, 1);
                 NodeAllocTraits::construct(NodeAlloc, container[index], value);
             }
-            else {
+            else {                
                 while (curr->next != nullptr) {
                     curr = curr->next;
                 }
+
                 curr->next = NodeAllocTraits::allocate(NodeAlloc, 1);
                 NodeAllocTraits::construct(NodeAlloc, curr->next, value);
             }
@@ -86,20 +90,13 @@ namespace hash_table_chaining {
             for(size_t i = 0; i < capacity; ++i) {
                 Node* curr = container[i];
             
-            
-                if(curr) {
+                while(curr) {
                     Node* next = curr->next;
-            
-                    while (next) {
-                        curr = next;
-                        next = curr->next;
-                        NodeAllocTraits::destroy(NodeAlloc, curr);
-                        NodeAllocTraits::deallocate(NodeAlloc, curr, 1);
-                    }
-
-                    NodeAllocTraits::destroy(NodeAlloc, container[i]);
-                    NodeAllocTraits::deallocate(NodeAlloc, container[i], 1);
+                    NodeAllocTraits::destroy(NodeAlloc, curr);
+                    NodeAllocTraits::deallocate(NodeAlloc, curr, 1);
+                    curr = next;
                 }
+                NodeAllocTraits::destroy(NodeAlloc, container[i]);
             }
             NodePtrAllocTraits::deallocate(NodePtrAlloc, container, capacity);
         }

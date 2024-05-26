@@ -3,12 +3,12 @@
 
 #include <iostream>
 #include <memory>
-
+#include <cmath>
 
 
 namespace hash_table_double {
 
-    constexpr size_t prime = 3;
+    constexpr size_t prime = 83;
 
 
     template <typename T, typename Hash = std::hash<T>, typename Allocator = std::allocator<T>>
@@ -30,8 +30,12 @@ namespace hash_table_double {
 
     public:
 
-        explicit hash_table(size_t size): capacity(size), elements(0) {
+        explicit hash_table(size_t size): capacity(std::pow(2, std::ceil(std::log2(size)))), elements(0) {
+           
             container = PtrAllocTraits::allocate(PtrAlloc, capacity);
+            for(size_t i = 0; i < capacity; ++i) {
+                PtrAllocTraits::construct(PtrAlloc, container+i, nullptr);
+            }
         }
 
         void insert(const T& value) {        
@@ -80,29 +84,21 @@ namespace hash_table_double {
         }
 
         size_t secondary_hash(const T& value) const {
-            std::size_t hash1 = hashable_obj(value);
-            std::size_t hash2 = hashable_obj(value) * prime;
-
-            return hash1 ^ (hash2 << 1);  
+            size_t hash = 2 * (1 + (hashable_obj(value) % capacity/2)) -1;
+            return hash;  
         }
 
-       
         size_t size() const {
             return elements;
         }
 
-        ~hash_table() {    
+        ~hash_table() { 
             for(size_t i = 0; i < capacity; ++i) {
-                            
-                if(container[i]) {
-                    AllocTraits::destroy(Alloc, container[i]);
-                    AllocTraits::deallocate(Alloc, container[i], 1);
-                }
-
+                AllocTraits::destroy(Alloc, container[i]);
+                AllocTraits::deallocate(Alloc, container[i], 1);  
             }
             PtrAllocTraits::deallocate(PtrAlloc, container, capacity);
         }
-
 
     };
 

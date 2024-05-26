@@ -28,9 +28,17 @@ namespace hash_table_probing {
 
         explicit hash_table(size_t size): capacity(size), elements(0) {
             container = PtrAllocTraits::allocate(PtrAlloc, capacity);
+            for(size_t i = 0; i < capacity; ++i) {
+                PtrAllocTraits::construct(PtrAlloc, container+i, nullptr);
+            }
         }
 
         void insert(const T& value) {        
+
+            if(elements >= capacity) {
+                throw std::runtime_error("No free space");
+            }
+
             size_t index = hashable_obj(value)%capacity;
             
             if(!container[index]) {
@@ -39,16 +47,12 @@ namespace hash_table_probing {
             }
             else {
                 
-                size_t counter = 1;
-                while (container[index+counter]) {
-                    if(index+counter >= capacity) {
-                        throw std::logic_error("No free places");
-                    }      
-                    ++counter;
+                while (container[index]) {   
+                    index = (index + 1) % capacity;
                 }
                 
-                container[index+counter] = AllocTraits::allocate(Alloc, 1);
-                AllocTraits::construct(Alloc, container[index+counter], value);
+                container[index] = AllocTraits::allocate(Alloc, 1);
+                AllocTraits::construct(Alloc, container[index], value);
             }
             ++elements;
         }
@@ -61,10 +65,11 @@ namespace hash_table_probing {
             }
 
             size_t counter = 0;
-            while(container[index+counter] && index+counter < capacity) {
-                if(*(container[index+counter]) == value) {
+            while(container[index] && counter < capacity) {
+                if(*(container[index]) == value) {
                     return true;
                 }
+                index = (index + 1) % capacity;
                 ++counter;
             }
 
@@ -76,14 +81,10 @@ namespace hash_table_probing {
         }
 
 
-        ~hash_table() {        
+        ~hash_table() { 
             for(size_t i = 0; i < capacity; ++i) {
-                            
-                if(container[i]) {
-                    AllocTraits::destroy(Alloc, container[i]);
-                    AllocTraits::deallocate(Alloc, container[i], 1);
-                }
-
+                AllocTraits::destroy(Alloc, container[i]);
+                AllocTraits::deallocate(Alloc, container[i], 1);  
             }
             PtrAllocTraits::deallocate(PtrAlloc, container, capacity);
         }
