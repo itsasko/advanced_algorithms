@@ -41,7 +41,7 @@ constexpr int capacity = 2000;
 
 template <typename T>
 nanoseconds measure_time(T& obj, size_t& searched_element) {
-    std::uniform_int_distribution<size_t> dist(0, 2000);
+    std::uniform_int_distribution<size_t> dist(0, 100000);
     size_t number = dist(gen);
     
     searched_element = number;
@@ -97,8 +97,8 @@ void test(std::string filename, std::string filename2) {
             insert_double[i] += measure_time(tb3, last_element_double);
 
             search_chaining[i] += measure_search_time(tb1, last_element_chaining);
-            search_probing[i] += measure_search_time(tb1, last_element_chaining);
-            search_double[i] += measure_search_time(tb1, last_element_chaining);
+            search_probing[i] += measure_search_time(tb2, last_element_probing);
+            search_double[i] += measure_search_time(tb3, last_element_double);
 
         }
        std::cout << count << ' ' << std::endl;
