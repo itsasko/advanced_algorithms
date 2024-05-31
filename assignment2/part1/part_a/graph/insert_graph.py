@@ -2,43 +2,40 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 size = []
-
 list = []
 set = []
 trie = []
 hash = []
 
-i = 0
-
 with open('../data/build.txt', 'r') as file:
-    for line in file.readlines():
-        if(i == 0):
-            size.append(line.split(" ")[0])
-            list.append(float(line.split(" ")[1]))
-            set.append(float(line.split(" ")[2]))
-            trie.append(float(line.split(" ")[3]))
-            hash.append(float(line.split(" ")[4]))
-        i = (i+1)%2000
-
+    for count, line in enumerate(file.readlines()):
+        if count > 0:
+            data = line.split()
+            size.append(data[0])
+            list.append(float(data[1]))
+            set.append(float(data[2]))
+            trie.append(float(data[3]))
+            hash.append(float(data[4]))
 
 x = np.array(size)
-
 y1 = np.array(list)
 y2 = np.array(set)
 y3 = np.array(trie)
 y4 = np.array(hash)
 
 plt.figure(figsize=(10, 8))
+plt.plot(x, y1, color='c', label='List')
+plt.plot(x, y2, color='b', label='Set')
+plt.plot(x, y3, color='g', label='Trie')
+plt.plot(x, y4, color='y', label='Hash')
 
-plt.plot(x, y1, color = 'c', label = 'List')
-plt.plot(x, y2, color = 'b', label = 'Set')
-plt.plot(x, y3, color = 'g', label = 'Trie')
-plt.plot(x, y4, color = 'black', label = 'Hash')
-
-
-plt.xlabel("size")
-plt.ylabel("insert time")
-
+plt.xlabel("Size")
+plt.ylabel("Search Time")
 plt.legend()
 
+plt.xticks(ticks=np.arange(0, len(x), step=max(1, len(x)//10)), labels=x[::max(1, len(x)//10)])
+
+plt.xticks(rotation=45)
+
+plt.tight_layout() 
 plt.show()

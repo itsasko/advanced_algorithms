@@ -95,16 +95,42 @@ auto measure_search_time(std::list<std::string>& obj, const std::string& searche
 }
 
 
+void test_insert(std::vector<std::string>& words, const std::string& filename) {
+    std::ofstream file(filename);
+
+    for (size_t i = 1; i <= words.size(); i += 100) {
+        std::list<std::string> word_list;
+        std::set<std::string> word_set;
+        Trie word_trie;
+        std::unordered_set<std::string> word_hash;
+
+        nanoseconds total_time_list(0), total_time_set(0), total_time_trie(0), total_time_hash(0);
+
+        for (size_t j = 0; j < i; ++j) {
+            total_time_list += measure_insert(word_list, words[j]);
+            total_time_set += measure_insert(word_set, words[j]);
+            total_time_trie += measure_insert(word_trie, words[j]);
+            total_time_hash += measure_insert(word_hash, words[j]);
+        }
+
+        nanoseconds avg_time_list = total_time_list / i;
+        nanoseconds avg_time_set = total_time_set / i;
+        nanoseconds avg_time_trie = total_time_trie / i;
+        nanoseconds avg_time_hash = total_time_hash / i;
+
+        file << i << ' '
+             << avg_time_list.count() << ' '
+             << avg_time_set.count() << ' '
+             << avg_time_trie.count() << ' '
+             << avg_time_hash.count() << '\n';
+    
+        std::cout << i << '\n';
+    }
+    file.close();
+}
 
 
-
-void test(std::vector<std::string> words, std::string filename, std::string filename2) {
-    nanoseconds insert_list = nanoseconds(0);
-    nanoseconds insert_set = nanoseconds(0);
-    nanoseconds insert_trie = nanoseconds(0);
-    nanoseconds insert_hash = nanoseconds(0);
-
-
+void test(std::vector<std::string> words, const std::string& filename) {
     std::vector<nanoseconds> search_list(max_size, nanoseconds(0));
     std::vector<nanoseconds> search_set(max_size, nanoseconds(0));
     std::vector<nanoseconds> search_trie(max_size, nanoseconds(0));
@@ -116,23 +142,16 @@ void test(std::vector<std::string> words, std::string filename, std::string file
     Trie word_list_3;
     std::unordered_set<std::string> word_list_4;
 
-    std::ofstream file(filename);
 
     for(size_t i = 0; i < words.size(); ++i) {
-        insert_list = measure_insert(word_list_1, words[i]);
-        insert_set = measure_insert(word_list_2, words[i]);
-        insert_trie = measure_insert(word_list_3, words[i]);
-        insert_hash = measure_insert(word_list_4, words[i]);
-    
-        file << i+1 << ' ' << insert_list.count() << ' ' << insert_set.count() << ' ' << insert_trie.count()<< ' ' << insert_hash.count() << '\n';
+        word_list_1.push_back(words[i]);
+        word_list_2.insert(words[i]);
+        word_list_3.insert(words[i]);
+        word_list_4.insert(words[i]);
     }
-
-    file.close();
 
 
     for(size_t count = 0; count < max_count; ++count) {
-
-      
 
 
        for(size_t size = 0; size < max_size; size += increment) {
@@ -152,12 +171,11 @@ void test(std::vector<std::string> words, std::string filename, std::string file
     }
 
 
-    std::ofstream file2(filename2);
+    std::ofstream file(filename);
     for(size_t i = 0; i < max_size; i += increment) {
-        file2 << i << ' ' << search_list[i].count()/max_count << ' ' << search_set[i].count()/max_count << ' ' << search_trie[i].count()/max_count << ' ' << search_hash[i].count()/max_count << '\n';
+        file << i << ' ' << search_list[i].count()/max_count << ' ' << search_set[i].count()/max_count << ' ' << search_trie[i].count()/max_count << ' ' << search_hash[i].count()/max_count << '\n';
     }
-    file2.close();
-
+    file.close();
 
 }
  
@@ -173,8 +191,8 @@ int main() {
 
 
 
-
-    test(words, "data/build.txt", "data/search.txt");
+    test_insert(words, "data/build.txt");
+    test(words,  "data/search.txt");
 }
 
 

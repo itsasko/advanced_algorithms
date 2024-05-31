@@ -17,7 +17,7 @@ with open('../data/search.txt', 'r') as file:
                 list.append(float(line.split(" ")[1]))
                 set.append(float(line.split(" ")[2]))
                 trie.append(float(line.split(" ")[3]))
-                hash.append(float(line.split(" ")[0]))
+                hash.append(float(line.split(" ")[4]))
 
 
 
