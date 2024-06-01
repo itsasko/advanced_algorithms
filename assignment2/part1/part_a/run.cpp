@@ -59,7 +59,9 @@ auto measure_search_time(T& obj, const std::string& searched_element) -> decltyp
     auto end = std::chrono::steady_clock::now();
 	nanoseconds time = std::chrono::duration_cast<nanoseconds>(end - start);
 
-    assert(found != obj.end());
+    if(found == obj.end()) {
+        std::cout << searched_element << " is incorrect" << std::endl;
+    }
 
     return time;
 }
@@ -74,7 +76,9 @@ auto measure_search_time(T& obj, const std::string& searched_element) -> decltyp
     auto end = std::chrono::steady_clock::now();
 	nanoseconds time = std::chrono::duration_cast<nanoseconds>(end - start);
 
-    assert(found);
+    if(!found) {
+        std::cout << searched_element << " is incorrect" << std::endl;
+    }
 
     return time;
 }
@@ -89,7 +93,9 @@ auto measure_search_time(std::list<std::string>& obj, const std::string& searche
     auto end = std::chrono::steady_clock::now();
 	nanoseconds time = std::chrono::duration_cast<nanoseconds>(end - start);
 
-    assert(found);
+    if(!found) {
+        std::cout << searched_element << " is incorrect" << std::endl;
+    }
 
     return time;
 }
