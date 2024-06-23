@@ -14,9 +14,9 @@
 #include "../../../get_data.hpp"
 
 
-constexpr int max_count = 10;
-constexpr int max_size = 200;
-constexpr int increment = 10;
+constexpr int max_count = 100;
+constexpr int max_size = 5000;
+constexpr int increment = 100;
 
 
 bool list_search(std::list<std::string>& obj, std::string searched_word) {
@@ -142,33 +142,33 @@ void test(std::vector<std::string> words, const std::string& filename) {
     std::vector<nanoseconds> search_trie(max_size, nanoseconds(0));
     std::vector<nanoseconds> search_hash(max_size, nanoseconds(0));
 
-
-    std::list<std::string> word_list_1;
-    std::set<std::string> word_list_2;
-    Trie word_list_3;
-    std::unordered_set<std::string> word_list_4;
-
-
-    for(size_t i = 0; i < words.size(); ++i) {
-        word_list_1.push_back(words[i]);
-        word_list_2.insert(words[i]);
-        word_list_3.insert(words[i]);
-        word_list_4.insert(words[i]);
-    }
+   
 
 
     for(size_t count = 0; count < max_count; ++count) {
 
+       for(size_t size = 1; size < max_size; size += increment) {
 
-       for(size_t size = 0; size < max_size; size += increment) {
-           auto sentence = generate_sentence(words, size+1);
+            std::list<std::string> word_list_1;
+            std::set<std::string> word_list_2;
+            Trie word_list_3;
+            std::unordered_set<std::string> word_list_4;
 
-            for(auto& word: sentence) {
-                search_list[size] += measure_search_time(word_list_1, word);
-                search_set[size] += measure_search_time(word_list_2, word);
-                search_trie[size] += measure_search_time(word_list_3, word);
-                search_hash[size] += measure_search_time(word_list_4, word);
+
+
+            for(size_t i = 0; i < size; ++i) {
+                word_list_1.push_back(words[i]);
+                word_list_2.insert(words[i]);
+                word_list_3.insert(words[i]);
+                word_list_4.insert(words[i]);
             }
+
+            std::uniform_int_distribution<size_t> dist(0, size-1);
+            std::string word = words[dist(gen)];
+            search_list[size] += measure_search_time(word_list_1, word);
+            search_set[size] += measure_search_time(word_list_2, word);
+            search_trie[size] += measure_search_time(word_list_3, word);
+            search_hash[size] += measure_search_time(word_list_4, word);
 
        }
 
@@ -178,7 +178,7 @@ void test(std::vector<std::string> words, const std::string& filename) {
 
 
     std::ofstream file(filename);
-    for(size_t i = 0; i < max_size; i += increment) {
+    for(size_t i = 1; i < max_size; i += increment) {
         file << i << ' ' << search_list[i].count()/max_count << ' ' << search_set[i].count()/max_count << ' ' << search_trie[i].count()/max_count << ' ' << search_hash[i].count()/max_count << '\n';
     }
     file.close();

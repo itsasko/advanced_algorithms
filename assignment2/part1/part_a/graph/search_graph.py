@@ -15,9 +15,9 @@ with open('../data/search.txt', 'r') as file:
             if(count > 0):
                 size.append(line.split(" ")[0])
                 list.append(float(line.split(" ")[1]))
-                set.append(float(line.split(" ")[2]))
-                trie.append(float(line.split(" ")[3]))
-                hash.append(float(line.split(" ")[4]))
+                set.append(float(line.split(" ")[1]))
+                trie.append(float(line.split(" ")[2]))
+                hash.append(float(line.split(" ")[3]))
 
 
 
@@ -29,7 +29,7 @@ y3 = np.array(trie)
 y4 = np.array(hash)
 
 plt.figure(figsize=(10, 8))
-
+plt.xticks(range(0, 100, 15)) 
 plt.plot(x, y1, color = 'c', label = 'List')
 plt.plot(x, y2, color = 'b', label = 'Set')
 plt.plot(x, y3, color = 'g', label = 'Trie')
