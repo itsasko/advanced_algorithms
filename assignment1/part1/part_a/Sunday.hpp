@@ -1,3 +1,6 @@
+#ifndef SUNDAY
+#define SUNDAY
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -38,26 +41,4 @@ std::vector<size_t> Sunday(const std::string& _text, const std::string& _pattern
 }
 
 
-int main() {
-    std::string text, pattern;
-
-    std::cout << "Enter text: ";
-    std::getline(std::cin, text);
-    std::cout << "Enter pattern: ";
-    std::getline(std::cin, pattern);
-
-    std::vector<size_t> indices = Sunday(text, pattern);
-
-    if (!indices.empty()) {
-        std::cout << "Pattern found at indices: ";
-        for (size_t index : indices) {
-            std::cout << index << " ";
-        }
-        std::cout << std::endl;
-    }
-    else {
-        std::cout << "Pattern has not been found" << std::endl;
-    }
-
-    return 0;
-}
+#endif

@@ -21,5 +21,5 @@ public:
     void search();
 };
 
-#endif FSM_H
+#endif
 

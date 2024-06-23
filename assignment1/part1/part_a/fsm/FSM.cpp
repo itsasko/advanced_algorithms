@@ -1,5 +1,3 @@
-#ifndef FSM_CPP
-#define FSM_CPP
 #include "FSM.h"
 
 
@@ -65,5 +63,3 @@ void FSM::search()
             occurences.push_back(i - M + 1);
     }
 }
-
-#endif FSM_H
