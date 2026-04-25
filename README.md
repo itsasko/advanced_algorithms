@@ -34,7 +34,7 @@ Implemented algorithms:
 - KMP is at least 2× faster than Rabin-Karp
 - Rabin-Karp is at least 2× faster than Sunday
 
-🧪 *Includes*: Custom inputs of ≥100kB with commentary and explanation.
+🧪 *Includes*: Custom inputs of >=100kB with commentary and explanation.
 
 ---
 
